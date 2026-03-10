@@ -20,14 +20,17 @@ class BookingList:
         cur.next = new_node
 
     def display(self):
+
         cur = self.head
         if cur is None:
             print("No booking data")
             return
+
+        print("\n=== BOOKING LIST ===")
+        print("Route\tPassenger\tSeat")
+        print("--------------------------------")
         while cur:
-            print("Route:", cur.route_code,
-                  "| Passenger:", cur.passenger_id,
-                  "| Seat:", cur.seat)
+            print(cur.route_code, "\t", cur.passenger_id, "\t\t", cur.seat)
             cur = cur.next
 
     def sort_bookings(self):
@@ -42,10 +45,18 @@ class BookingList:
             self.add_booking(r, p, s)
         print("Bookings sorted successfully")
 
-    def check_passenger(self, passenger_id):
+    def check_duplicate(self, route_code, passenger_id):
         cur = self.head
         while cur:
-            if cur.passenger_id == passenger_id:
+            if cur.route_code == route_code and cur.passenger_id == passenger_id:
+                return True
+            cur = cur.next
+        return False
+
+    def check_seat(self, route_code, seat):
+        cur = self.head
+        while cur:
+            if cur.route_code == route_code and cur.seat == seat:
                 return True
             cur = cur.next
         return False
@@ -56,9 +67,15 @@ class BookingList:
         seat = input("Seat number: ").strip()
         if route == "" or passenger == "" or seat == "":
             print("Input cannot be empty")
+            pause()
             return
-        if self.check_passenger(passenger):
-            print("Passenger already booked")
+        if self.check_duplicate(route, passenger):
+            print("This passenger already booked this route")
+            pause()
+            return
+        if self.check_seat(route, seat):
+            print("Seat already taken")
+            pause()
             return
         self.add_booking(route, passenger, seat)
         print("Booking success")
@@ -73,10 +90,13 @@ class BookingList:
                 else:
                     prev.next = cur.next
                 print("Booking cancelled")
+                pause()
                 return
             prev = cur
             cur = cur.next
         print("Booking not found")
+        pause()
+
 
     def history(self, passenger_id):
         cur = self.head
@@ -90,6 +110,7 @@ class BookingList:
             cur = cur.next
         if not found:
             print("No booking history")
+        pause()
 
     def revenue(self):
         cur = self.head
@@ -97,38 +118,49 @@ class BookingList:
         while cur:
             count += 1
             cur = cur.next
-        revenue = count * 100
+        fare = 100
+        revenue = count * fare
         print("Total bookings:", count)
+        print("Fare per ticket:", fare)
         print("Total revenue:", revenue)
 
 def pause():
     input("\nPress Enter to continue...")
 
+
 def booking_list_menu(bl):
 
     while True:
+
         print("\n===== BOOKING LIST =====")
         print("1. Input booking")
         print("2. Display bookings")
         print("3. Sort bookings")
         print("0. Back")
+
         choice = input("Choose: ").strip()
 
         if not choice.isdigit():
             print("Please enter a number")
             pause()
             continue
+
         choice = int(choice)
 
         if choice == 1:
             r = input("Route code: ").strip()
             p = input("Passenger id: ").strip()
             s = input("Seat number: ").strip()
-
             if r == "" or p == "" or s == "":
                 print("Input cannot be empty")
             else:
-                bl.add_booking(r, p, s)
+                if bl.check_duplicate(r, p):
+                    print("This passenger already booked this route")
+                elif bl.check_seat(r, s):
+                    print("Seat already taken")
+                else:
+                    bl.add_booking(r, p, s)
+                    print("Booking added")
             pause()
 
         elif choice == 2:
@@ -141,24 +173,29 @@ def booking_list_menu(bl):
 
         elif choice == 0:
             break
+
         else:
             print("Invalid choice")
             pause()
 
+
 def booking_operation_menu(bl):
     while True:
+
         print("\n===== BOOKING OPERATIONS =====")
         print("1. Process booking")
         print("2. Cancel booking")
         print("3. Passenger booking history")
         print("4. Revenue report")
         print("0. Back")
+        
         choice = input("Choose: ").strip()
 
         if not choice.isdigit():
             print("Please enter a number")
             pause()
             continue
+
         choice = int(choice)
 
         if choice == 1:
@@ -169,17 +206,17 @@ def booking_operation_menu(bl):
             p = input("Passenger id: ").strip()
             if p == "":
                 print("Passenger id cannot be empty")
+                pause()
             else:
                 bl.cancel_booking(p)
-            pause()
 
         elif choice == 3:
             p = input("Passenger id: ").strip()
             if p == "":
                 print("Passenger id cannot be empty")
+                pause()
             else:
                 bl.history(p)
-            pause()
 
         elif choice == 4:
             bl.revenue()
